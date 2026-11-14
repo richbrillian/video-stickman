@@ -3,6 +3,7 @@
   "judul_layar": "Tenggorokan gatal terus? Coba ini!",
   "suara": "id-ID-GadisNeural",
   "musik": "ceria",
+  "produk_foto": "https://down-id.img.susercontent.com/file/id-11134207-822wl-mpy0dzebq9zi13",
   "produk_ikon": "toples",
   "produk_label": "MADU",
   "tokoh": {
@@ -13,7 +14,7 @@
     {"teks": "Aduh, tenggorokan gatal terus nih. Minum obat tapi tetap nggak enak!", "latar": "kamar", "tata": "penuh", "min": 5,
      "tokoh": [{"nama": "Andi", "aksi": "haus", "posisi": "tengah"}]},
     {"teks": "Eh Andi, coba madu asli multiflora satu kilo ini. Cuma tiga puluh lima ribu rupiah!", "latar": "kafe", "tata": "atas_produk", "min": 5,
-     "harga": "Rp35.000", "coret": "Rp59.000",
+     "harga": "Rp35.000",
      "tokoh": [{"nama": "Andi", "aksi": "kaget", "posisi": "kiri"}, {"nama": "Mira", "aksi": "memberi", "posisi": "kanan", "bawa": "produk"}]},
     {"teks": "Wah, manisnya pas, rasanya alami! Sudah terjual sepuluh ribu lebih dengan rating empat koma delapan.", "latar": "taman", "tata": "goyang", "min": 6,
      "chat": [{"dari": "kiri", "teks": "Madunya asli banget!", "centang": false}, {"dari": "kanan", "teks": "Terjual 10RB+", "centang": false}, {"dari": "kiri", "teks": "Rating 4,8", "centang": false}],
