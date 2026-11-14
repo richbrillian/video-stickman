@@ -74,35 +74,36 @@ def muat_foto(sumber, folder):
 POS = {"kiri": 175, "tengah": 360, "kanan": 545}
 
 
-def gambar_adegan(ad, cerita, t, dur_bicara, kartu, thumb, judul_layar=None):
+def gambar_adegan(ad, cerita, t, dur_bicara, kartu, thumb, judul_layar=None, dur=5.0):
     K = M.Kanvas()
-    M.latar(K, ad.get("latar", "kota"), t)
     tata = ad.get("tata", "penuh")
+    tokoh_list = ad.get("tokoh", [])
+    jalan = any(tk.get("aksi") in ("jalan", "jalan_masuk") for tk in tokoh_list) or ad.get("geser")
+    M.GESER[0] = t * 140 if jalan else 0.0
+    M.latar(K, ad.get("latar", "kota"), t)
     tokoh_def = cerita.get("tokoh", {})
-    n_tok = len(ad.get("tokoh", []))
+    n_tok = len(tokoh_list)
+    k_in = min(t / 0.35, 1); k_in = 1 - (1 - k_in) ** 3
 
-    # lapisan atas (produk)
-    if tata == "atas_produk":
-        bob = math.sin(t * 2.5) * 4
-        k = min(t / 0.35, 1); k = 1 - (1 - k) ** 3
+    if tata == "penuh":  # stickman penuh, produk goyang pelan di tengah
         if kartu is not None:
-            K.tempel(M.rotasi(kartu, math.sin(t * 2) * 2, max(0.6 * k, 0.05)), 360, 250 + bob)
+            K.tempel(M.rotasi(kartu, math.sin(t * 1.8) * 4, max(0.40 * k_in, 0.05)), 360, 470 + math.sin(t * 2.2) * 8)
+        skala = 1.35
+    elif tata == "atas_produk":  # produk di atas, stickman di bawah
+        if kartu is not None:
+            K.tempel(M.rotasi(kartu, math.sin(t * 2) * 2, max(0.6 * k_in, 0.05)), 360, 250 + math.sin(t * 2.5) * 4)
         M.banner_harga(K, ad.get("harga", ""), ad.get("coret", ""), t)
-        skala, gy = 1.0, M.GY
-    elif tata == "goyang":
-        k = min(t / 0.3, 1)
+        skala = 1.0
+    else:  # goyang: stickman + produk goyang sedikit
         if kartu is not None:
-            sk = (0.42 if ad.get("efek") == "panah" else 0.5) * (1 + 0.035 * math.sin(t * 6)) * (0.6 + 0.4 * k)
-            K.tempel(M.rotasi(kartu, math.sin(t * 4.2) * 7, sk), 360, (235 if ad.get("efek") == "panah" else 260) + math.sin(t * 3) * 6)
-        skala, gy = (1.0 if (ad.get("chat") or ad.get("efek")) else 1.1), M.GY
+            sk = (0.42 if ad.get("efek") == "panah" else 0.5) * (1 + 0.02 * math.sin(t * 5)) * (0.6 + 0.4 * k_in)
+            K.tempel(M.rotasi(kartu, math.sin(t * 3.5) * 3, sk), 360, (235 if ad.get("efek") == "panah" else 260) + math.sin(t * 3) * 5)
+        skala = 1.0 if (ad.get("chat") or ad.get("efek")) else 1.1
         if ad.get("chat"):
             M.bubble_chat(K, ad["chat"], t, 440)
-    else:
-        skala, gy = 1.55 if n_tok == 1 else 1.4, M.GY
 
-    # tokoh
-    masuk = []
-    for i, tk in enumerate(ad.get("tokoh", [])):
+    bicara_aktif = 0.25 < t < 0.25 + dur_bicara
+    for tk in tokoh_list:
         cfg = tokoh_def.get(tk["nama"], {})
         pos = tk.get("posisi", "tengah")
         x = POS[pos]
@@ -110,24 +111,22 @@ def gambar_adegan(ad, cerita, t, dur_bicara, kartu, thumb, judul_layar=None):
         if n_tok >= 2:
             d = 1 if x < 360 else -1
         aksi = tk.get("aksi", "diam")
+        tt = t
         if aksi == "jalan_masuk":
-            kk = min(t / 1.2, 1)
-            x += -(1 - kk) * 420 * d
-            aksi_pakai = "jalan" if kk < 1 else "diam"
-            tt = t if kk < 1 else t - 1.2
+            kk = min(t / 1.4, 1)
+            x += -(1 - kk) * 460 * d
+            if kk < 1:
+                aksi = "jalan"
+            else:
+                aksi = tk.get("lalu", "diam"); tt = t - 1.4
         elif aksi == "pergi":
-            x += d * -1 * t * 260
-            d = -d
-            aksi_pakai, tt = "jalan", t
-        else:
-            aksi_pakai, tt = aksi, t
-        masuk.append((x, aksi_pakai, tt, d, tk.get("bawa"), cfg))
-    for x, aksi_pakai, tt, d, bawa, cfg in masuk:
-        M.tokoh(K, cfg, x, aksi_pakai, tt, d, bawa, skala, thumb, gy)
+            x += -d * t * 260; d = -d; aksi = "jalan"
+        M.tokoh(K, cfg, x, aksi, tt, d, tk.get("bawa"), skala, thumb, M.GY,
+                bicara=bool(tk.get("bicara")) and bicara_aktif)
 
     if ad.get("efek"):
         M.efek_layar(K, ad["efek"], t)
-    if judul_layar and tata == "penuh":
+    if judul_layar:
         kata, baris, cur = judul_layar.split(), [], []
         for w in kata:
             if K.lebar_teks(" ".join(cur + [w]), 46) > 600 and cur:
@@ -136,15 +135,23 @@ def gambar_adegan(ad, cerita, t, dur_bicara, kartu, thumb, judul_layar=None):
                 cur.append(w)
         baris.append(" ".join(cur))
         h = 70 * len(baris) + 30
-        slide = min(t / 0.3, 1)
-        yo = -(1 - slide) * 300
+        yo = -(1 - min(t / 0.3, 1)) * 300
         K.kotak((30, 70 + yo, 690, 70 + h + yo), 30, fill="#ffd21f", outline="white", w=5)
         for j, b in enumerate(baris):
-            K.teks((360, 70 + 15 + 35 + j * 70 + yo), b, 46, "#3b2300")
+            K.teks((360, 120 + j * 70 + yo), b, 46, "#3b2300")
     M.keterangan(K, ad.get("teks", ""), t, dur_bicara)
     img = K.hasil()
-    if t < 0.18:  # kilatan transisi
-        img = Image.blend(Image.new("RGB", img.size, "white"), img, 0.55 + t / 0.18 * 0.45)
+    # kamera: zoom pelan + sedikit geser, hentakan saat kaget
+    z = 1.0 + 0.06 * (t / max(dur, 0.1))
+    if any(tk.get("aksi") in ("kaget", "panik") for tk in tokoh_list) and t < 0.5:
+        z += 0.03 * math.sin(t * 40)
+    if z > 1.001:
+        cw, chh = M.W / z, M.H / z
+        ox = (M.W - cw) / 2 + math.sin(t * 0.7) * 6
+        oy = (M.H - chh) * 0.85
+        img = img.crop((ox, oy, ox + cw, oy + chh)).resize((M.W, M.H), Image.BILINEAR)
+    if t < 0.15:
+        img = Image.blend(Image.new("RGB", img.size, "white"), img, 0.5 + t / 0.15 * 0.5)
     return img
 
 
@@ -193,7 +200,7 @@ def render(path_json, out_mp4):
             dur_bicara = len(suaras[i]) / SR
             judul = cerita.get("judul_layar") if i == 0 else None
             for f in range(int(round(d * FPS))):
-                img = gambar_adegan(a, cerita, f / FPS, dur_bicara, kartu, thumb, judul)
+                img = gambar_adegan(a, cerita, f / FPS, dur_bicara, kartu, thumb, judul, d)
                 ff.stdin.write(img.tobytes())
         ff.stdin.close()
         ff.wait()

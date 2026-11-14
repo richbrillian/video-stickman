@@ -1,0 +1,29 @@
+{
+  "judul": "Affiliate Madu Multiflora 1kg - Gagal Nembak",
+  "judul_layar": "Mau nembak gebetan malah batuk!",
+  "suara": "id-ID-GadisNeural",
+  "musik": "ceria",
+  "produk_foto": "https://down-id.img.susercontent.com/file/id-11134207-822wl-mpy0dzebq9zi13",
+  "produk_ikon": "toples",
+  "produk_label": "MADU",
+  "tokoh": {
+    "Andi": {"jenis": "laki", "baju": "biru"},
+    "Mira": {"jenis": "perempuan", "baju": "merah muda", "rambut": "coklat"}
+  },
+  "adegan": [
+    {"teks": "Andi mau nembak Mira, eh malah batuk terus. Uhuk, uhuk!", "latar": "taman", "tata": "penuh", "min": 5,
+     "tokoh": [{"nama": "Andi", "aksi": "jalan_masuk", "lalu": "batuk", "posisi": "kiri"}, {"nama": "Mira", "aksi": "kaget", "posisi": "kanan"}]},
+    {"teks": "Nih, minum madu asli satu kilo. Cuma tiga puluh lima ribu!", "latar": "taman", "tata": "atas_produk", "min": 5,
+     "harga": "Rp35.000",
+     "tokoh": [{"nama": "Andi", "aksi": "batuk", "posisi": "kiri"}, {"nama": "Mira", "aksi": "memberi", "posisi": "kanan", "bawa": "produk", "bicara": true}]},
+    {"teks": "Glek, glek. Wah, tenggorokan langsung lega, manisnya alami banget!", "latar": "taman", "tata": "goyang", "min": 5,
+     "tokoh": [{"nama": "Andi", "aksi": "minum", "posisi": "kiri", "bawa": "produk", "bicara": true}, {"nama": "Mira", "aksi": "tertawa", "posisi": "kanan"}]},
+    {"teks": "Mira, kamu mau jadi pacarku? Iya dong, suaramu sekarang merdu!", "latar": "senja", "tata": "goyang", "efek": "hati", "min": 5,
+     "tokoh": [{"nama": "Andi", "aksi": "berlutut", "posisi": "kiri", "bawa": "bunga", "bicara": true}, {"nama": "Mira", "aksi": "cinta", "posisi": "kanan"}]},
+    {"teks": "Madunya sudah terjual sepuluh ribu lebih, rating empat koma delapan.", "latar": "kafe", "tata": "goyang", "min": 5,
+     "chat": [{"dari": "kiri", "teks": "Asli, nggak dicampur", "centang": false}, {"dari": "kanan", "teks": "Terjual 10RB+", "centang": false}, {"dari": "kiri", "teks": "Rating 4,8", "centang": false}],
+     "tokoh": [{"nama": "Andi", "aksi": "joget", "posisi": "kiri"}, {"nama": "Mira", "aksi": "joget", "posisi": "kanan"}]},
+    {"teks": "Klik keranjang kuning sekarang! Kamu pernah gagal nembak gara-gara apa?", "latar": "senja", "tata": "goyang", "efek": "panah", "min": 5,
+     "tokoh": [{"nama": "Andi", "aksi": "melambai", "posisi": "kiri", "bicara": true}, {"nama": "Mira", "aksi": "melambai", "posisi": "kanan"}]}
+  ]
+}

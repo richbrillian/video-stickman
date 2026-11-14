@@ -129,6 +129,9 @@ def pohon(K, x, y, s=1.0):
         K.lingkaran(x + dx * s, y + dy * s, r * s, fill="#2e9b4a")
 
 
+GESER = [0.0]
+
+
 def latar(K, nama, t):
     rnd = random.Random(7)
     if nama == "taman":
@@ -138,16 +141,18 @@ def latar(K, nama, t):
         awan(K, (t * 9 + 400) % 900 - 150, 380, 0.8)
         K.elips((-200, 700, 520, 1120), fill="#7fcf6b")
         K.elips((300, 740, 960, 1140), fill="#6bc15a")
-        pohon(K, 110, GY - 60, 1.0)
-        pohon(K, 620, GY - 50, 0.85)
+        gs = GESER[0]
+        for bx0, sk in ((110, 1.0), (620, 0.85), (380, 0.7)):
+            pohon(K, (bx0 - gs) % (W + 300) - 150, GY - 50, sk)
         K.d.rectangle([0, GY * SS, W * SS, H * SS], fill="#5eb34e")
     elif nama == "kota":
         gradien(K, "#9ccfff", "#f0f8ff", 0, GY)
         awan(K, (t * 12) % 900 - 150, 200, 1.0)
         gedung(K, rnd, "#8ea4bd", "#ffe9a8")
         K.d.rectangle([0, GY * SS, W * SS, H * SS], fill="#6b7078")
-        for x in range(0, W, 120):
-            K.d.rectangle([(x + 10) * SS, 1130 * SS, (x + 70) * SS, 1140 * SS], fill="#e8e8e8")
+        for x in range(-120, W + 120, 120):
+            xx = x - GESER[0] % 120
+            K.d.rectangle([(xx + 10) * SS, (GY + 60) * SS, (xx + 70) * SS, (GY + 70) * SS], fill="#e8e8e8")
     elif nama == "kafe":
         K.d.rectangle([0, 0, W * SS, GY * SS], fill="#f2dcc0")
         K.kotak((70, 200, 360, 560), 14, fill="#bfe3f5", outline="#8a5a36", w=10)
@@ -274,6 +279,16 @@ def pose(aksi, t):
     elif aksi == "panik":
         p["wajah"] = "kaget"; p["efek"] = ["keringat", "seru"]; p["dx"] = s(t * 30) * 4
         p["F"] = (150 + s(t * 14) * 18, 165); p["B"] = (-150 - s(t * 14) * 18, -165)
+    elif aksi == "batuk":
+        k = abs(s(t * 9))
+        p["wajah"] = "sedih"; p["F"] = (112, 150); p["B"] = (-10, -5); p["efek"] = ["batuk"]
+        p["miring"] = 10 + k * 8; p["bob"] = -k * 4
+    elif aksi == "minum":
+        p["F"] = (100, 162 + s(t * 3) * 4); p["B"] = (-12, -6); p["miring"] = -6
+    elif aksi == "joget":
+        p["bob"] = abs(s(t * 8)) * 12; p["wajah"] = "tawa"; p["dx"] = s(t * 4) * 14
+        p["F"] = (120 + s(t * 8) * 30, 150); p["B"] = (-120 + s(t * 8) * 30, -150); p["miring"] = s(t * 4) * 8
+        p["LF"] = (12 + s(t * 8) * 10, 0); p["LB"] = (-12 + s(t * 8) * 10, 0)
     elif aksi == "lompat":
         p["bob"] = abs(s(t * 6)) * 70; p["wajah"] = "tawa"
         p["F"] = (150, 170); p["B"] = (-150, -170); p["LF"] = (25, -20); p["LB"] = (-25, -60)
@@ -325,9 +340,24 @@ def hati(K, x, y, r, fill="#ff4d7a"):
     K.poli([(x - r * 1.04, y - r * 0.05), (x + r * 1.04, y - r * 0.05), (x, y + r * 1.15)], fill=fill)
 
 
-def wajah(K, hx, hy, d, jenis, t):
+KULIT = "#ffe0c2"
+
+
+def wajah(K, hx, hy, d, jenis, t, bicara=False):
     ex = [hx + d * 9 - 14, hx + d * 9 + 14]
     ey = hy - 4
+    kedip = (t % 3.3) < 0.12 and jenis not in ("cinta", "kaget", "tawa")
+    # alis
+    if jenis == "sedih" or jenis == "haus":
+        K.garis([(ex[0] - 9, ey - 14), (ex[0] + 8, ey - 20)], 3.5)
+        K.garis([(ex[1] + 9, ey - 14), (ex[1] - 8, ey - 20)], 3.5)
+    elif jenis == "kaget":
+        K.busur((ex[0] - 9, ey - 26, ex[0] + 9, ey - 12), 200, 340, INK, 3.5)
+        K.busur((ex[1] - 9, ey - 26, ex[1] + 9, ey - 12), 200, 340, INK, 3.5)
+    else:
+        K.garis([(ex[0] - 8, ey - 15), (ex[0] + 7, ey - 17)], 3.5)
+        K.garis([(ex[1] - 7, ey - 17), (ex[1] + 8, ey - 15)], 3.5)
+    # mata
     if jenis == "cinta":
         for x in ex:
             hati(K, x, ey, 8)
@@ -338,97 +368,130 @@ def wajah(K, hx, hy, d, jenis, t):
     elif jenis == "tawa":
         for x in ex:
             K.busur((x - 8, ey - 4, x + 8, ey + 12), 200, 340, INK, 4)
+    elif kedip:
+        for x in ex:
+            K.garis([(x - 6, ey), (x + 6, ey)], 3.5)
     else:
         for x in ex:
-            K.lingkaran(x, ey, 5, fill=INK)
-    if jenis == "sedih":
-        K.garis([(ex[0] - 9, ey - 14), (ex[0] + 8, ey - 20)], 3.5)
-        K.garis([(ex[1] + 9, ey - 14), (ex[1] - 8, ey - 20)], 3.5)
-    if jenis == "malu":
-        for x in ex:
-            K.lingkaran(x + (-8 if x == ex[0] else 8), ey + 14, 8, fill=(255, 120, 150, 150))
+            K.elips((x - 5.5, ey - 7, x + 5.5, ey + 7), fill=INK)
+            K.lingkaran(x + d * 1.5 + 1.5, ey - 3, 2, fill="white")
+    # pipi
+    for x in ex:
+        K.lingkaran(x + (-6 if x == ex[0] else 6), ey + 15, 7 if jenis != "malu" else 9,
+                    fill=(255, 120, 150, 90 if jenis != "malu" else 170))
     mx = hx + d * 9
     my = hy + 15
-    if jenis in ("tawa",):
-        K.d.chord([(mx - 14) * SS, (my - 10) * SS, (mx + 14) * SS, (my + 16) * SS], 0, 180, fill="#7a1f2b", outline=INK, width=3 * SS)
+    buka = bicara and (math.sin(t * 22) + math.sin(t * 13)) > 0.2
+    if jenis == "tawa" or (buka and jenis not in ("sedih", "kaget")):
+        h = 16 if jenis == "tawa" else 10 + 4 * abs(math.sin(t * 17))
+        K.d.chord([(mx - 13) * SS, (my - 8) * SS, (mx + 13) * SS, (my + h) * SS], 0, 180, fill="#7a1f2b", outline=INK, width=3 * SS)
+        K.elips((mx - 6, my + h * 0.35, mx + 6, my + h * 0.8), fill="#ff7b9a")
     elif jenis == "kaget":
         K.elips((mx - 8, my - 4, mx + 8, my + 16), fill="#7a1f2b", outline=INK, w=2.5)
     elif jenis == "sedih":
         K.busur((mx - 12, my + 2, mx + 12, my + 22), 200, 340, INK, 4)
     elif jenis == "haus":
-        K.garis([(mx - 10, my + 4), (mx + 10, my + 4)], 4)
-        K.elips((mx - 4, my + 4, mx + 6, my + 24), fill="#ff7b9a", outline=INK, w=2)
+        K.elips((mx - 9, my - 2, mx + 9, my + 12), fill="#7a1f2b", outline=INK, w=2.5)
     else:
         K.busur((mx - 13, my - 10, mx + 13, my + 12), 20, 160, INK, 4)
 
 
-def tokoh(K, cfg, x, aksi, t, d, bawa=None, scale=1.0, produk_ikon=None, gy=GY):
-    """Gambar satu stickman. (x, gy) = titik kaki. d = arah hadap (+1 kanan, -1 kiri)."""
+def tokoh(K, cfg, x, aksi, t, d, bawa=None, scale=1.0, produk_ikon=None, gy=GY, bicara=False):
+    """Stickman detail. (x, gy) = titik kaki. d = arah hadap (+1 kanan, -1 kiri)."""
     p = pose(aksi, t)
     jenis = cfg.get("jenis", "laki")
     cb = warna(cfg.get("baju", "biru"))
     ch = warna(cfg.get("rambut", "hitam" if jenis == "laki" else "coklat"), "#333")
+    cc_ = warna(cfg.get("celana", "#3a4a6b"))
     S = scale
     x = x + p["dx"] * S
-    leg_len = (L_UL + L_LL) * S
-    hip_y = gy - leg_len + p["turun"] * S - p["bob"] * S
+    hip_y = gy - (L_UL + L_LL) * S + p["turun"] * S - p["bob"] * S
     sh_y = hip_y - L_TORSO * S
-    head_y = sh_y - (8 + R_HEAD) * S
+    head_y = sh_y - (10 + R_HEAD) * S
     lean = p["miring"] * d
-    head_x = x + math.sin(math.radians(lean)) * 14 * S
-    sh_x = x + math.sin(math.radians(lean)) * 5 * S
-    c = INK
-    lw = 8 * S
-
-    # bayangan
-    K.elips((x - 62 * S, gy - 9 * S, x + 62 * S, gy + 9 * S), fill=(0, 0, 0, 55))
+    head_x = x + math.sin(math.radians(lean)) * 16 * S
+    sh_x = x + math.sin(math.radians(lean)) * 6 * S
+    lw = 9 * S
+    K.elips((x - 64 * S, gy - 9 * S, x + 64 * S, gy + 9 * S), fill=(0, 0, 0, 55))
 
     def tungkai(u, l, ln1, ln2, sx, sy):
         kx, ky = pt(sx, sy, u, ln1 * S, d)
         fx, fy = pt(kx, ky, l, ln2 * S, d)
         return (sx, sy), (kx, ky), (fx, fy)
 
-    # kaki
+    def anggota(pts, warna_isi, tebal):
+        K.garis(pts, tebal + 4 * S, INK)
+        K.garis(pts, tebal, warna_isi)
+
+    # kaki + sepatu
     for kk in ("B", "F"):
         u, l = p["L" + kk]
-        a, b, cc = tungkai(u, l, L_UL, L_LL, x, hip_y)
-        celana = "#3a4a6b" if jenis == "laki" else c
-        K.garis([a, b, cc], lw, celana)
-        K.elips((cc[0] - 4 * S + d * 10 * S - 12 * S, cc[1] - 5 * S, cc[0] + d * 10 * S + 14 * S, cc[1] + 7 * S), fill="#222")
+        a, b, c = tungkai(u, l, L_UL, L_LL, x + (-6 if kk == "B" else 6) * S, hip_y)
+        if jenis == "laki":
+            anggota([a, b, c], cc_, lw * 1.7)
+        else:
+            anggota([a, b, c], KULIT, lw * 0.95)
+        sx = c[0] + d * 9 * S
+        K.elips((sx - 17 * S, c[1] - 9 * S, sx + 17 * S, c[1] + 7 * S), fill="#2b2b2b" if jenis == "laki" else "#e8546c", outline=INK, w=2.5 * S)
+        K.elips((sx - 6 * S, c[1] - 6 * S, sx + 10 * S, c[1] - 2 * S), fill=(255, 255, 255, 120))
     # badan
     if jenis == "perempuan":
-        K.poli([(sh_x - 16 * S, sh_y), (sh_x + 16 * S, sh_y), (x + 46 * S, hip_y + 38 * S), (x - 46 * S, hip_y + 38 * S)], fill=cb)
-        K.poli([(sh_x - 16 * S, sh_y), (sh_x + 16 * S, sh_y), (x + 14 * S, hip_y - 20 * S), (x - 14 * S, hip_y - 20 * S)], fill=cb)
+        K.d.polygon([((sh_x - 20 * S) * SS, sh_y * SS), ((sh_x + 20 * S) * SS, sh_y * SS),
+                     ((x + 52 * S) * SS, (hip_y + 40 * S) * SS), ((x - 52 * S) * SS, (hip_y + 40 * S) * SS)],
+                    fill=cb, outline=INK, width=int(3 * S * SS))
+        K.d.rectangle([(x - 18 * S) * SS, (hip_y - 30 * S) * SS, (x + 18 * S) * SS, (hip_y - 22 * S) * SS], fill="#ffffff")
+        for i in range(3):
+            K.lingkaran(x - 30 * S + i * 30 * S, hip_y + 18 * S, 5 * S, fill=(255, 255, 255, 140))
     else:
-        K.poli([(sh_x - 22 * S, sh_y - 2 * S), (sh_x + 22 * S, sh_y - 2 * S), (x + 19 * S, hip_y + 4 * S), (x - 19 * S, hip_y + 4 * S)], fill=cb)
-    K.garis([(sh_x, sh_y), (head_x, head_y + R_HEAD * S)], lw * 0.9, c)
+        K.d.polygon([((sh_x - 26 * S) * SS, (sh_y - 2 * S) * SS), ((sh_x + 26 * S) * SS, (sh_y - 2 * S) * SS),
+                     ((x + 22 * S) * SS, (hip_y + 6 * S) * SS), ((x - 22 * S) * SS, (hip_y + 6 * S) * SS)],
+                    fill=cb, outline=INK, width=int(3 * S * SS))
+        K.d.rectangle([(x - 22 * S) * SS, (hip_y - 2 * S) * SS, (x + 22 * S) * SS, (hip_y + 6 * S) * SS], fill="#5a3a22")
+        for i in range(3):
+            K.lingkaran(sh_x + (x - sh_x) * (i + 1) / 4, sh_y + L_TORSO * S * (i + 1) / 4 - 8 * S, 3 * S, fill="white")
+    # kerah + leher
+    K.garis([(sh_x, sh_y + 2 * S), (head_x, head_y + R_HEAD * S)], lw * 1.1, INK)
+    K.garis([(sh_x, sh_y + 2 * S), (head_x, head_y + R_HEAD * S)], lw * 0.6, KULIT)
+    K.poli([(sh_x - 14 * S, sh_y - 3 * S), (sh_x, sh_y + 12 * S), (sh_x + 14 * S, sh_y - 3 * S)], fill="white")
 
-    # lengan
+    # lengan (lengan baju + tangan)
     tangan = {}
     for kk in ("B", "F"):
         u, l = p[kk]
-        a, b, cc = tungkai(u, l, L_UA, L_LA, sh_x, sh_y + 6 * S)
-        K.garis([a, b, cc], lw * 0.85, c)
-        K.lingkaran(cc[0], cc[1], 5 * S, fill=c)
-        tangan[kk] = cc
+        a, b, c = tungkai(u, l, L_UA, L_LA, sh_x + (-10 if kk == "B" else 10) * S * d, sh_y + 8 * S)
+        anggota([a, b], cb, lw * 1.5)
+        anggota([b, c], KULIT, lw * 0.85)
+        K.lingkaran(c[0], c[1], 9 * S, fill=KULIT, outline=INK, w=2.5 * S)
+        tangan[kk] = c
 
     # rambut belakang
     if jenis == "perempuan":
-        K.elips((head_x - (R_HEAD + 8) * S, head_y - (R_HEAD + 8) * S, head_x + (R_HEAD + 8) * S, head_y + (R_HEAD + 46) * S), fill=ch)
-    # kepala
-    K.lingkaran(head_x, head_y, R_HEAD * S, fill="#fff6e6", outline=c, w=5 * S)
-    # rambut depan
-    K.d.chord([(head_x - (R_HEAD + 3) * S) * SS, (head_y - (R_HEAD + 3) * S) * SS,
-               (head_x + (R_HEAD + 3) * S) * SS, (head_y + (R_HEAD + 3) * S) * SS], 185, 355, fill=ch)
-    if jenis == "perempuan":
-        bx = head_x - d * (R_HEAD - 2) * S
-        K.lingkaran(bx - 6 * S, head_y - 26 * S, 9 * S, fill="#ff5a8a")
-        K.lingkaran(bx + 6 * S, head_y - 26 * S, 9 * S, fill="#ff5a8a")
+        hb = head_x - d * 18 * S
+        K.elips((hb - (R_HEAD + 2) * S, head_y - (R_HEAD + 8) * S, hb + (R_HEAD + 2) * S, head_y + (R_HEAD + 46) * S), fill=ch, outline=INK, w=2.5 * S)
+    # telinga + kepala
+    ex_ = head_x - d * (R_HEAD - 4) * S
+    K.lingkaran(ex_, head_y + 4 * S, 9 * S, fill=KULIT, outline=INK, w=2.5 * S)
+    K.lingkaran(head_x, head_y, R_HEAD * S, fill=KULIT, outline=INK, w=4 * S)
+    # rambut depan (poni)
+    K.d.chord([(head_x - (R_HEAD + 4) * S) * SS, (head_y - (R_HEAD + 6) * S) * SS,
+               (head_x + (R_HEAD + 4) * S) * SS, (head_y + (R_HEAD - 6) * S) * SS], 182, 358, fill=ch, outline=INK, width=int(2.5 * S * SS))
+    if jenis == "laki":
+        for i in range(3):
+            bx = head_x + (-14 + i * 14) * S
+            K.poli([(bx - 9 * S, head_y - (R_HEAD - 2) * S), (bx + 9 * S, head_y - (R_HEAD - 2) * S), (bx + d * 6 * S, head_y - (R_HEAD + 16) * S)], fill=ch)
+    else:
+        bx = head_x - d * (R_HEAD - 6) * S
+        K.lingkaran(bx - 7 * S, head_y - 28 * S, 10 * S, fill="#ff5a8a", outline=INK, w=2 * S)
+        K.lingkaran(bx + 7 * S, head_y - 28 * S, 10 * S, fill="#ff5a8a", outline=INK, w=2 * S)
+        K.lingkaran(bx, head_y - 28 * S, 5 * S, fill="#ffd54a")
     # wajah
     if S == 1.0:
-        wajah(K, head_x, head_y, d, p["wajah"], t)
+        wajah(K, head_x, head_y, d, p["wajah"], t, bicara)
     else:
-        wajah_skala(K, head_x, head_y, d, p["wajah"], t, S)
+        kecil = Kanvas(120, 120, rgba=True)
+        wajah(kecil, 60, 60, d, p["wajah"], t, bicara)
+        img = kecil.im.resize((int(120 * S * SS), int(120 * S * SS)), Image.LANCZOS)
+        K.tempel(img, head_x, head_y)
 
     # efek karakter
     for e in p["efek"]:
@@ -437,16 +500,20 @@ def tokoh(K, cfg, x, aksi, t, d, bawa=None, scale=1.0, produk_ikon=None, gy=GY):
                 yy = head_y + 6 * S + ((t * 60 + i * 30) % 60) * S
                 K.elips((head_x + d * 9 * S - 22 * S + i * 28 * S, yy, head_x + d * 9 * S - 14 * S + i * 28 * S, yy + 16 * S), fill=(110, 190, 255, 230))
         elif e == "seru":
-            K.teks((head_x + 52 * S, head_y - 52 * S - abs(math.sin(t * 8)) * 6), "!", 54 * S, "#ff3b3b", stroke=3, stroke_fill="white")
+            K.teks((head_x + 52 * S, head_y - 52 * S - abs(math.sin(t * 8)) * 6), "!", int(54 * S), "#ff3b3b", stroke=3, stroke_fill="white")
         elif e == "keringat":
             yy = head_y - 20 * S + ((t * 70) % 40) * S
-            K.elips((head_x - 52 * S, yy, head_x - 42 * S, yy + 18 * S), fill=(110, 190, 255, 230))
+            K.elips((head_x - d * 52 * S - 5 * S, yy, head_x - d * 52 * S + 5 * S, yy + 18 * S), fill=(110, 190, 255, 230))
         elif e == "hati_kecil":
             for i in range(3):
                 ph = (t * 0.8 + i * 0.33) % 1
                 hati(K, head_x + (i - 1) * 34 * S + math.sin(ph * 6) * 8, head_y - 52 * S - ph * 80 * S, 9 * S, (255, 77, 122, int(255 * (1 - ph))))
+        elif e == "batuk":
+            for i in range(3):
+                ph = (t * 1.6 + i * 0.33) % 1
+                K.lingkaran(head_x + d * (40 + ph * 70) * S, head_y + (14 - ph * 20) * S, (6 + ph * 12) * S, fill=(200, 200, 200, int(220 * (1 - ph))))
+            K.teks((head_x + d * 70 * S, head_y - 50 * S), "uhuk!", int(28 * S), "#555", stroke=2, stroke_fill="white")
 
-    # prop di tangan depan
     if bawa:
         hx, hy = tangan["F"]
         ikon = produk_ikon
@@ -454,14 +521,6 @@ def tokoh(K, cfg, x, aksi, t, d, bawa=None, scale=1.0, produk_ikon=None, gy=GY):
             ikon = ikon.resize((int(ikon.width * S), int(ikon.height * S)), Image.LANCZOS)
         gambar_prop_skala(K, bawa, hx, hy, d, t, ikon, S)
     return x, head_y
-
-
-def wajah_skala(K, hx, hy, d, jenis, t, S):
-    """Wajah dengan skala: gambar di kanvas kecil lalu tempel."""
-    kecil = Kanvas(120, 120, rgba=True)
-    wajah(kecil, 60, 60, d, jenis, t)
-    img = kecil.im.resize((int(120 * S * SS), int(120 * S * SS)), Image.LANCZOS)
-    K.tempel(img, hx, hy)
 
 
 def gambar_prop_skala(K, jenis, hx, hy, d, t, ikon, S):
