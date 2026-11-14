@@ -1,0 +1,26 @@
+{
+  "judul": "Affiliate Madu Multiflora 1kg",
+  "judul_layar": "Tenggorokan gatal terus? Coba ini!",
+  "suara": "id-ID-GadisNeural",
+  "musik": "ceria",
+  "produk_ikon": "toples",
+  "produk_label": "MADU",
+  "tokoh": {
+    "Andi": {"jenis": "laki", "baju": "biru"},
+    "Mira": {"jenis": "perempuan", "baju": "merah muda", "rambut": "coklat"}
+  },
+  "adegan": [
+    {"teks": "Aduh, tenggorokan gatal terus nih. Minum obat tapi tetap nggak enak!", "latar": "kamar", "tata": "penuh", "min": 5,
+     "tokoh": [{"nama": "Andi", "aksi": "haus", "posisi": "tengah"}]},
+    {"teks": "Eh Andi, coba madu asli multiflora satu kilo ini. Cuma tiga puluh lima ribu rupiah!", "latar": "kafe", "tata": "atas_produk", "min": 5,
+     "harga": "Rp35.000", "coret": "Rp59.000",
+     "tokoh": [{"nama": "Andi", "aksi": "kaget", "posisi": "kiri"}, {"nama": "Mira", "aksi": "memberi", "posisi": "kanan", "bawa": "produk"}]},
+    {"teks": "Wah, manisnya pas, rasanya alami! Sudah terjual sepuluh ribu lebih dengan rating empat koma delapan.", "latar": "taman", "tata": "goyang", "min": 6,
+     "chat": [{"dari": "kiri", "teks": "Madunya asli banget!", "centang": false}, {"dari": "kanan", "teks": "Terjual 10RB+", "centang": false}, {"dari": "kiri", "teks": "Rating 4,8", "centang": false}],
+     "tokoh": [{"nama": "Andi", "aksi": "tertawa", "posisi": "kiri"}, {"nama": "Mira", "aksi": "cinta", "posisi": "kanan"}]},
+    {"teks": "Stok keluarga jadi aman, bisa buat teh, roti, sampai jaga daya tahan tubuh. Tinggal tuang, praktis!", "latar": "kafe", "tata": "goyang", "min": 6,
+     "tokoh": [{"nama": "Andi", "aksi": "lompat", "posisi": "kiri"}, {"nama": "Mira", "aksi": "melambai", "posisi": "kanan"}]},
+    {"teks": "Klik keranjang kuning sekarang, mumpung masih murah. Kamu biasanya minum madu pakai apa?", "latar": "senja", "tata": "goyang", "efek": "panah", "min": 6,
+     "tokoh": [{"nama": "Andi", "aksi": "melambai", "posisi": "kiri"}, {"nama": "Mira", "aksi": "melambai", "posisi": "kanan"}]}
+  ]
+}
